@@ -45,7 +45,7 @@ class Mechanism():
         
         joints_freedom = Counter(joints)
 
-        freedom = m * (N - 1 -J)
-        constraints = sum([Mechanism.f_values[item]*count for  item, count in joints_freedom.items()])
+        sum1 = m * (N - 1 -J)
+        sum2 = sum([Mechanism.f_values[item]*count for  item, count in joints_freedom.items()])
 
-        return freedom + constraints
+        return sum1 + sum2
