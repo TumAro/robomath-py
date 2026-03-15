@@ -8,3 +8,11 @@ dependencies = [
     "modern-robotics>=1.1.1",
     "numpy>=2.2.6",
 ]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]

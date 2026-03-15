@@ -2,9 +2,9 @@ import math
 from typing import Optional, List
 from collections import Counter
 
-class nDimensionalBody():
+class nDimensionalRigidBody():
     @staticmethod
-    def n_dim_dof(n: int) -> int:
+    def dim2dof(n: int) -> int:
         '''
         For n-dimensional body -> the dof
         '''
@@ -20,6 +20,27 @@ class nDimensionalBody():
             return math.floor(m-n)
         
         return math.floor(n*(n-1)/2)
+    
+    @staticmethod
+    def dof2trans_freedom(n: int, m: Optional[int]) -> int:
+        '''
+        For n-dimensional body -> it can translate to n direction in Euclidean space
+        '''
+        return n
+    
+    @staticmethod
+    def space_topology(n: int) -> str:
+
+        topology = ""
+        for power in range(n, 0, -1):
+            if power == n:
+                topology += f"R{power}"
+                continue
+
+            topology += f" x S{power}"
+
+        return topology
+
     
 
 class Mechanism():
@@ -49,3 +70,15 @@ class Mechanism():
         sum2 = sum([Mechanism.f_values[item]*count for  item, count in joints_freedom.items()])
 
         return sum1 + sum2
+    
+    @staticmethod
+    def loop_closure():
+        pass
+
+    @staticmethod
+    def pfaffian() -> bool:
+        pass
+    
+    @staticmethod
+    def planar_serial_fk_workspace() -> bool:
+        pass

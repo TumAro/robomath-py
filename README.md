@@ -3,4 +3,6 @@ to initiate run
 uv init
 ```
 then activate the virtual env  
-then go to [Coppelia Sim](https://www.coppeliarobotics.com/) and download the `edu` version for your system
+then go to [Coppelia Sim](https://www.coppeliarobotics.com/) and download the `edu` version for your system  
+
+The book pdf can be found [here](https://hades.mech.northwestern.edu/images/0/0c/MR-tablet-v2.pdf)
