@@ -228,3 +228,5 @@ class PlanarNBarClosedChain:
 
         fig.tight_layout()
         plt.show()
+
+
