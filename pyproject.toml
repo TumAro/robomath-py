@@ -1,7 +1,7 @@
 [project]
 name = "mr"
 version = "0.1.0"
-description = "Add your description here"
+description = "My own implementation of robotics maths from 1st principles"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
