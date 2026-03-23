@@ -111,3 +111,38 @@ class SO3:
             [sin(theta), cos(theta), 0],
             [0,0,1]
         ])
+    
+
+class so3:
+    @staticmethod
+    def skew_symmetric(x1, x2, x3) -> NDArray:
+        '''
+        INPUT
+        vector x = [x1 x2 x3]^T in R^3
+        
+        OUTPUT
+        skew symmetric matrix [x]
+        '''
+        return np.array([
+            [0, -x3, x2],
+            [x3 , 0, -x1],
+            [-x2, x1, 0]
+        ])
+    
+    @staticmethod
+    def check_skew_symmetry(matrix: NDArray) -> bool:
+        '''
+        [x] = -[x]^T
+        '''
+        return matrix.T == -matrix
+    
+    @staticmethod
+    def skew2vec(matrix: NDArray) -> List[float]:
+        if not so3.check_skew_symmetry(matrix):
+            raise ValueError("Not a skew symmetrix matrix!")
+        
+        x1 = -matrix[1][2]
+        x2 = matrix[0][2]
+        x3 = -matrix[0][1]
+
+        return [x1, x2, x3]
