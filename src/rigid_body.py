@@ -1,7 +1,7 @@
 import numpy as np
 from math import sin, cos
 from numpy.typing import NDArray
-from typing import List
+from typing import List, Tuple
 
 class SO2:
     identity = np.identity(2, dtype=np.float32)
@@ -111,7 +111,29 @@ class SO3:
             [sin(theta), cos(theta), 0],
             [0,0,1]
         ])
-    
+
+    @staticmethod
+    def rodrigues(w: List, theta: float) -> NDArray:
+        '''
+        INPUT:
+        w -> unit axis of rotation in 3D
+        theta -> rotated how long
+
+        OUTPUT:
+        Rotation matrix in SO3
+        '''
+
+        if len(w) != 3:
+            raise ValueError("Rotation axis is not in 3D")
+        
+        if abs(sum(i*i for i in w) - 1.0) > 1e-9:
+            raise ValueError("Rotation axis is not unit vector.")
+        
+        skew_omega = so3.skew_symmetric(*w)
+
+        rot = np.identity(3) + sin(theta)*skew_omega + (1-cos(theta))*(skew_omega**2)
+        return rot
+
 
 class so3:
     @staticmethod
@@ -146,3 +168,37 @@ class so3:
         x3 = -matrix[0][1]
 
         return [x1, x2, x3]
+    
+    @staticmethod
+    def logarithm(R: NDArray) -> Tuple[NDArray, float]:
+        '''
+        INPUT:
+        R -> rotation matrix in SO3 (3x3 NDArray)
+
+        OUTPUT:
+        skew_omega -> skew symmetric matrix of the rotation axis (3x3 NDArray)
+        theta      -> angle of rotation in radians (float)
+        '''
+
+        if R.shape != (3,3):
+            raise ValueError("Not a rotation Matrix in SO3")
+
+        # case 1: R = I
+        if np.allclose(R, np.identity(3)):
+            return np.zeros((3,3)), 0
+        
+        # case 2: tr(R) = -1
+        if abs(np.trace(R) + 1) < 1e-9:
+            theta = np.pi
+            if abs(1 + R[2, 2]) > 1e-9:
+                w = (1 / np.sqrt(2 * (1 + R[2, 2]))) * np.array([R[0, 2], R[1, 2], 1 + R[2, 2]])
+            elif abs(1 + R[1, 1]) > 1e-9:
+                w = (1 / np.sqrt(2 * (1 + R[1, 1]))) * np.array([R[0, 1], 1 + R[1, 1], R[2, 1]])
+            else:
+                w = (1 / np.sqrt(2 * (1 + R[0, 0]))) * np.array([1 + R[0, 0], R[1, 0], R[2, 0]])
+            return so3.skew_symmetric(*w), theta
+        
+        # otherwise
+        theta = np.arccos(0.5 * (np.trace(R) - 1))
+        w = (R - R.T)/(2*sin(theta))
+        return w, theta
