@@ -53,7 +53,7 @@ class SO3:
         (R^T)R = I
         det(R) = 1
         '''
-        if R.T*R != SO3.identity:
+        if abs(R.T @ R - SO3.identity) > 1e-9:
             return False
         if np.linalg.det(R) != 1:
             return False
@@ -133,7 +133,6 @@ class SO3:
 
         rot = np.identity(3) + sin(theta)*skew_omega + (1-cos(theta))*(skew_omega**2)
         return rot
-
 
 class so3:
     @staticmethod
