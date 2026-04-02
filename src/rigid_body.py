@@ -134,6 +134,13 @@ class SO3:
         rot = np.identity(3) + sin(theta)*skew_omega + (1-cos(theta))*(skew_omega**2)
         return rot
 
+    @staticmethod
+    def skewmat2SO3(w_theta: NDArray) -> NDArray:
+        theta = float(np.linalg.norm(w_theta))
+        w_hat = list(w_theta / theta)
+
+        return SO3.rodrigues(w_hat, theta)
+
 class so3:
     @staticmethod
     def skew_symmetric(x1, x2, x3) -> NDArray:
