@@ -12,9 +12,9 @@ class SO2:
         (R^T)R = I
         det(R) = 1
         '''
-        if R.T*R != SO2.identity:
+        if not np.allclose(R.T @ R, SO2.identity):
             return False
-        if np.linalg.det(R) != 1:
+        if abs(np.linalg.det(R) - 1) > 1e-6:
             return False
         
         return True
@@ -48,14 +48,14 @@ class SO3:
         return r==c
     
     @staticmethod
-    def so3_test(R: NDArray) -> bool:
+    def SO3_test(R: NDArray) -> bool:
         '''
         (R^T)R = I
         det(R) = 1
         '''
-        if abs(R.T @ R - SO3.identity) > 1e-9:
+        if not np.allclose(R.T @ R, SO3.identity):
             return False
-        if np.linalg.det(R) != 1:
+        if abs(np.linalg.det(R) - 1) > 1e-6:
             return False
         
         return True
@@ -74,7 +74,7 @@ class SO3:
         if the given matrix is a rotation matrix ->
         R^-1 = R^T
         '''
-        if SO3.so3_test(R):
+        if SO3.SO3_test(R):
             return R.T
 
         return SO3.identity
@@ -131,13 +131,14 @@ class SO3:
         
         skew_omega = so3.skew_symmetric(*w)
 
-        rot = np.identity(3) + sin(theta)*skew_omega + (1-cos(theta))*(skew_omega**2)
+        rot = np.identity(3) + sin(theta)*skew_omega + (1-cos(theta))*(skew_omega @ skew_omega)
         return rot
 
     @staticmethod
     def skewmat2SO3(w_theta: NDArray) -> NDArray:
-        theta = float(np.linalg.norm(w_theta))
-        w_hat = list(w_theta / theta)
+        w_vec = so3.skew2vec(w_theta)
+        theta = float(np.linalg.norm(w_vec))
+        w_hat = [float(x / theta) for x in w_vec]
 
         return SO3.rodrigues(w_hat, theta)
 
@@ -162,16 +163,16 @@ class so3:
         '''
         [x] = -[x]^T
         '''
-        return matrix.T == -matrix
+        return np.allclose(matrix.T, -matrix)
     
     @staticmethod
     def skew2vec(matrix: NDArray) -> List[float]:
         if not so3.check_skew_symmetry(matrix):
             raise ValueError("Not a skew symmetrix matrix!")
         
-        x1 = -matrix[1][2]
+        x1 = matrix[2][1]
         x2 = matrix[0][2]
-        x3 = -matrix[0][1]
+        x3 = matrix[1][0]
 
         return [x1, x2, x3]
     
