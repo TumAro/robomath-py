@@ -209,7 +209,60 @@ class so3:
         theta = np.arccos(0.5 * (np.trace(R) - 1))
         w = (R - R.T)/(2*sin(theta))
         return w, theta
-    
+
+class SE2:
+    @staticmethod
+    def SE2_test(T: NDArray) -> bool:
+        '''
+        T is in SE2 if:
+        - shape is (3x3)
+        - top-left 2x2 is a valid rotation matrix in SO2 (R^T R = I, det(R) = 1)
+        - bottom row is [0, 0, 1]
+        '''
+        if T.shape != (3, 3):
+            return False
+        if not SO2.so2_test(T[:2, :2]):
+            return False
+        if not np.allclose(T[2], [0, 0, 1]):
+            return False
+        return True
+
+    @staticmethod
+    def transform(theta: float, p: NDArray) -> NDArray:
+        '''
+        INPUT:
+        theta -> angle of rotation in radians
+        p     -> position of the new frame origin expressed in the original frame (2, NDArray)
+
+        OUTPUT:
+        T -> homogeneous transformation matrix in SE2 (3x3 NDArray)
+        '''
+        T = np.eye(3)
+        T[:2, :2] = SO2.rot_matrix(theta)
+        T[:2, 2] = p
+        return T
+
+    @staticmethod
+    def trans_inverse(T: NDArray) -> NDArray:
+        '''
+        Computes the inverse of a 2D transformation matrix analytically
+        using T^-1 = [R^T, -R^T p; 0, 1] instead of np.linalg.inv
+
+        INPUT:
+        T -> homogeneous transformation matrix in SE2 (3x3 NDArray)
+
+        OUTPUT:
+        invT -> inverse transformation matrix in SE2 (3x3 NDArray)
+        '''
+        if not SE2.SE2_test(T):
+            raise ValueError("Not a valid transformation matrix in SE2")
+        R = T[:2, :2]
+        p = T[:2, 2]
+        invT = np.eye(3)
+        invT[:2, :2] = R.T
+        invT[:2, 2] = -(R.T) @ p
+        return invT
+
 class SE3:
     @staticmethod
     def SE3_test(T: NDArray) -> bool:
@@ -322,12 +375,3 @@ class SE3:
         invT[:3, 3] = -(R.T)@p
 
         return invT
-
-
-'''
-- [ ] **`rp_to_trans(R, p)`** — §3.3.1, Def 3.13 — builds 4×4 T from R, p. (Ex 3.16b)
-- [ ] **`trans_to_rp(T)`** — extracts R, p from T.
-- [ ] **`trans_inv(T)`** — §3.3.1.1, Prop 3.15 — T⁻¹ without numpy.linalg.inv. (Ex 3.16c)
-'''
-
-
