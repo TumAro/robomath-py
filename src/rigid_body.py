@@ -209,3 +209,56 @@ class so3:
         theta = np.arccos(0.5 * (np.trace(R) - 1))
         w = (R - R.T)/(2*sin(theta))
         return w, theta
+    
+class SE3:
+    @staticmethod
+    def transform(R: NDArray, p: NDArray) -> NDArray:
+
+        T = np.eye(4)
+        T[:3, :3] = R
+        T[:3, 3] = p
+
+        return T
+    
+    @staticmethod
+    def getRotation(T: NDArray) -> NDArray:
+
+        return T[:3, :3]
+    
+    @staticmethod
+    def getTranslation(T: NDArray) -> NDArray:
+
+        return T[:3, 3]
+    
+    @staticmethod
+    def rotation(w: list, theta: float) -> NDArray:
+        T = np.eye(4)
+        T[:3, :3] = SO3.rodrigues(w, theta)
+        return T
+    
+    @staticmethod
+    def translation(p: NDArray) -> NDArray:
+
+        T = np.eye(4)
+        T[:3, 3] = p
+        return T
+    
+    @staticmethod
+    def trans_inverse(T: NDArray) -> NDArray:
+        R = T[:3, :3]
+        p = T[:3, 3]
+
+        invT = np.eye(4)
+        invT[:3,:3] = R.T
+        invT[:3, 3] = -(R.T)@p
+
+        return invT
+
+
+'''
+- [ ] **`rp_to_trans(R, p)`** — §3.3.1, Def 3.13 — builds 4×4 T from R, p. (Ex 3.16b)
+- [ ] **`trans_to_rp(T)`** — extracts R, p from T.
+- [ ] **`trans_inv(T)`** — §3.3.1.1, Prop 3.15 — T⁻¹ without numpy.linalg.inv. (Ex 3.16c)
+'''
+
+
