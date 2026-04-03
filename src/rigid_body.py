@@ -212,8 +212,31 @@ class so3:
     
 class SE3:
     @staticmethod
-    def transform(R: NDArray, p: NDArray) -> NDArray:
+    def SE3_test(T: NDArray) -> bool:
+        '''
+        T is in SE3 if:
+        - shape is (4x4)
+        - top-left 3x3 is a valid rotation matrix (R^T R = I, det(R) = 1)
+        - bottom row is [0, 0, 0, 1]
+        '''
+        if T.shape != (4, 4):
+            return False
+        if not SO3.SO3_test(T[:3, :3]):
+            return False
+        if not np.allclose(T[3], [0, 0, 0, 1]):
+            return False
+        return True
 
+    @staticmethod
+    def transform(R: NDArray, p: NDArray) -> NDArray:
+        '''
+        INPUT:
+        R -> rotation matrix in SO3 (3x3 NDArray)
+        p -> position of the new frame origin expressed in the original frame (3, NDArray)
+
+        OUTPUT:
+        T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
+        '''
         T = np.eye(4)
         T[:3, :3] = R
         T[:3, 3] = p
@@ -222,29 +245,75 @@ class SE3:
     
     @staticmethod
     def getRotation(T: NDArray) -> NDArray:
+        '''
+        INPUT:
+        T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
 
+        OUTPUT:
+        R -> rotation part of the transformation (3x3 NDArray)
+        '''
+        if not SE3.SE3_test(T):
+            raise ValueError("Not a valid transformation matrix in SE3")
         return T[:3, :3]
     
     @staticmethod
     def getTranslation(T: NDArray) -> NDArray:
+        '''
+        INPUT:
+        T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
 
+        OUTPUT:
+        p -> translation vector, origin of the new frame in the original frame (3, NDArray)
+        '''
+        if not SE3.SE3_test(T):
+            raise ValueError("Not a valid transformation matrix in SE3")
         return T[:3, 3]
     
     @staticmethod
     def rotation(w: list, theta: float) -> NDArray:
+        '''
+        Pure rotation transformation (no translation)
+
+        INPUT:
+        w     -> unit axis of rotation in 3D
+        theta -> angle of rotation in radians
+
+        OUTPUT:
+        T -> transformation matrix with rotation only, translation is zero (4x4 NDArray)
+        '''
         T = np.eye(4)
         T[:3, :3] = SO3.rodrigues(w, theta)
         return T
     
     @staticmethod
     def translation(p: NDArray) -> NDArray:
+        '''
+        Pure translation transformation (no rotation)
 
+        INPUT:
+        p -> displacement vector in R^3 (3, NDArray)
+
+        OUTPUT:
+        T -> transformation matrix with translation only, rotation is identity (4x4 NDArray)
+        '''
         T = np.eye(4)
         T[:3, 3] = p
         return T
     
     @staticmethod
     def trans_inverse(T: NDArray) -> NDArray:
+        '''
+        Computes the inverse of a transformation matrix analytically
+        using T^-1 = [R^T, -R^T p; 0, 1] instead of np.linalg.inv
+
+        INPUT:
+        T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
+
+        OUTPUT:
+        invT -> inverse transformation matrix in SE3 (4x4 NDArray)
+        '''
+        if not SE3.SE3_test(T):
+            raise ValueError("Not a valid transformation matrix in SE3")
         R = T[:3, :3]
         p = T[:3, 3]
 
