@@ -3,6 +3,8 @@ from math import sin, cos
 from numpy.typing import NDArray
 from typing import List, Tuple
 
+
+# * SPECIAL ORTHOGONAL GROUP
 class SO2:
     identity = np.identity(2, dtype=np.float32)
 
@@ -210,6 +212,8 @@ class so3:
         w = (R - R.T)/(2*sin(theta))
         return w, theta
 
+
+# * SPECIAL EUCLIDEAN GROUP
 class SE2:
     @staticmethod
     def SE2_test(T: NDArray) -> bool:
@@ -375,3 +379,140 @@ class SE3:
         invT[:3, 3] = -(R.T)@p
 
         return invT
+ 
+class se3:
+
+    @staticmethod
+    def check_se3(mat: NDArray) -> bool:
+        if mat.shape != (4, 4):
+            return False
+        if not np.allclose(mat[3, :], 0):
+            return False
+        if not so3.check_skew_symmetry(mat[:3, :3]):
+            return False
+        return True
+    
+    @staticmethod
+    def vec_to_se3(V: NDArray) -> NDArray:
+        '''
+        INPUT:
+        Vector from R^6 where V = (w, v)
+
+        OUTPUT:
+        Twist in se3
+        '''
+        w, v = V[:3], V[3:]
+
+        w_so3 = so3.skew_symmetric(*w)
+
+        result = np.zeros((4,4))
+        result[:3,:3] = w_so3
+        result[:3,3] = v
+
+        return result
+
+    @staticmethod
+    def se3_to_vec(mat: NDArray) -> NDArray:
+        '''
+        INPUT:
+        4x4 se3 matrix [V]
+
+        OUTPUT:
+        V = (w,v) in R^6
+        '''
+
+        w = so3.skew2vec(mat[:3,:3])
+        v = mat[:3, 3]
+
+        return np.concatenate(w,v)
+    
+    @staticmethod
+    def adjoint(T: NDArray) -> NDArray:
+        '''
+        INPUT:
+        4x4 Tranformation Matrix
+
+        OUTPUT:
+        adjoint matrix [Ad_T]
+        '''
+
+        R = T[:3,:3]
+        p = T[:3, 3]
+
+        adj = np.zeros((6,6))
+
+        adj[:3,:3] = R
+        adj[3:,3:] = R
+        adj[3:, :3] = so3.skew_symmetric(*p) @ R
+
+        return adj
+
+    @staticmethod
+    def screw_exp6(w: NDArray, v: NDArray, theta: float) -> NDArray:
+        '''
+        INPUT:
+        let S = (w,v) screw axis
+
+        OUTPUT:
+        exponential coordinate
+        '''
+        if not so3.check_skew_symmetry(w):
+            raise ValueError("Matrix provided is not a skew symmetric matrix")
+
+        exp = np.eye(4)
+        if np.abs(np.linalg.norm(so3.skew2vec(w)) - 1) < 1e-9:
+            
+            exp[:3, :3] = SO3.rodrigues(list(so3.skew2vec(w)), theta)
+            exp[:3, 3] = (np.eye(3)*theta + (1-cos(theta))*w + (theta - sin(theta)) * (w @ w)  ) @ v
+
+            return exp
+        
+        elif np.linalg.norm(so3.skew2vec(w)) < 1e-9 and np.abs(np.linalg.norm(v) - 1) < 1e-9:
+
+            exp[:3, 3] = v * theta
+
+            return exp
+        
+        else:
+            raise ValueError("Invalid screw axis: must have ‖ω‖=1, or ω=0 and ‖v‖=1")
+
+    @staticmethod
+    def mat_exp6(se3mat: NDArray, theta: float) -> NDArray:
+        if not se3.check_se3(se3mat):
+            raise ValueError("Not a se3 matrix")
+        
+        return se3.screw_exp6(se3mat[:3, :3], se3mat[:3, 3], theta)
+
+    @staticmethod
+    def logarithm6(T: NDArray) -> Tuple[NDArray, NDArray, float]:
+        '''
+        INPUT:
+        T in SE3
+
+        OUPUT:
+        [S]theta - ([w], v, theta) in se3
+        '''
+
+        if not SE3.SE3_test(T):
+            raise ValueError("Not a valid SE3 matrix.")
+        
+        R = T[:3, :3]
+        p = T[:3, 3]
+
+        if np.allclose(R, np.eye(3)):
+            w = np.zeros((3,3))
+            theta = float(np.linalg.norm(p))
+            v = p / theta
+            return (w, v, theta)
+
+        else:
+            w, theta = so3.logarithm(R)
+            v = ( np.eye(3)/theta - w/2 + (1/theta - cos(theta/2)/(2*sin(theta/2))) * (w @ w) ) @ p
+
+            return (w, v, theta)
+            
+
+
+'''
+- [ ] **`screw_to_axis(q, s_hat, h)`** —Definition 3.24 - §3.3.2.2, Def 3.24 — builds S from {q, ŝ, h}. (Ex 3.26, 3.27)
+'''
