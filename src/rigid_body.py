@@ -11,8 +11,13 @@ class SO2:
     @staticmethod
     def SO2_test(R: NDArray) -> bool:
         '''
-        (R^T)R = I
-        det(R) = 1
+        Tests whether a matrix belongs to SO(2).
+
+        INPUT:
+        R : (2x2 NDArray) — candidate rotation matrix
+
+        OUTPUT:
+        bool — True if R ∈ SO(2), i.e. R^T R = I and det(R) = 1
         '''
         if not np.allclose(R.T @ R, SO2.identity):
             return False
@@ -24,9 +29,14 @@ class SO2:
     @staticmethod
     def rot_inv(R: NDArray) -> NDArray[np.float32]:
         '''
-        if the given matrix is a rotation matrix ->
-        R^-1 = R^T
-        else -> return identity
+        Computes the inverse of a rotation matrix in SO(2).
+
+        INPUT:
+        R : (2x2 NDArray) — rotation matrix, R ∈ SO(2)
+
+        OUTPUT:
+        R^-1 : (2x2 NDArray) — inverse rotation, R^-1 = R^T ∈ SO(2)
+               returns identity if R ∉ SO(2)
         '''
         if SO2.SO2_test(R):
             return R.T
@@ -35,6 +45,15 @@ class SO2:
     
     @staticmethod
     def rot_matrix(theta: float) -> NDArray[np.float32]:
+        '''
+        Constructs a 2D rotation matrix from an angle.
+
+        INPUT:
+        theta : float — angle of rotation in radians, θ ∈ R
+
+        OUTPUT:
+        R : (2x2 NDArray) — rotation matrix R ∈ SO(2)
+        '''
         return np.array([
             [cos(theta), -sin(theta)],
             [sin(theta), cos(theta)]
@@ -52,8 +71,13 @@ class SO3:
     @staticmethod
     def SO3_test(R: NDArray) -> bool:
         '''
-        (R^T)R = I
-        det(R) = 1
+        Tests whether a matrix belongs to SO(3).
+
+        INPUT:
+        R : (3x3 NDArray) — candidate rotation matrix
+
+        OUTPUT:
+        bool — True if R ∈ SO(3), i.e. R^T R = I and det(R) = 1
         '''
         if not np.allclose(R.T @ R, SO3.identity):
             return False
@@ -65,16 +89,27 @@ class SO3:
     @staticmethod
     def transpose(R: List[List[float]]):
         '''
-        OUTPUT: Python Lists
-        outputs the transpose of the matrix
+        Computes the transpose of a matrix represented as nested Python lists.
+
+        INPUT:
+        R : List[List[float]] — matrix as nested lists
+
+        OUTPUT:
+        R^T : List[List[float]] — transpose of R
         '''
         return [list(row) for row in zip(*R)]
     
     @staticmethod
     def rot_inv(R: NDArray) -> NDArray[np.float32]:
         '''
-        if the given matrix is a rotation matrix ->
-        R^-1 = R^T
+        Computes the inverse of a rotation matrix in SO(3).
+
+        INPUT:
+        R : (3x3 NDArray) — rotation matrix, R ∈ SO(3)
+
+        OUTPUT:
+        R^-1 : (3x3 NDArray) — inverse rotation, R^-1 = R^T ∈ SO(3)
+               returns identity if R ∉ SO(3)
         '''
         if SO3.SO3_test(R):
             return R.T
@@ -84,7 +119,13 @@ class SO3:
     @staticmethod
     def rot_x(theta: float) -> NDArray[np.float32]:
         '''
-        Rotation matrix about X-axes
+        Constructs a rotation matrix about the X-axis.
+
+        INPUT:
+        theta : float — angle of rotation in radians, θ ∈ R
+
+        OUTPUT:
+        R : (3x3 NDArray) — rotation matrix R ∈ SO(3)
         '''
         return np.array([
             [1, 0, 0],
@@ -95,7 +136,13 @@ class SO3:
     @staticmethod
     def rot_y(theta: float) -> NDArray[np.float32]:
         '''
-        Rotation matrix about Y-axes
+        Constructs a rotation matrix about the Y-axis.
+
+        INPUT:
+        theta : float — angle of rotation in radians, θ ∈ R
+
+        OUTPUT:
+        R : (3x3 NDArray) — rotation matrix R ∈ SO(3)
         '''
         return np.array([
             [cos(theta), 0, sin(theta)],
@@ -106,7 +153,13 @@ class SO3:
     @staticmethod
     def rot_z(theta: float) -> NDArray[np.float32]:
         '''
-        Rotation matrix about Z-axes
+        Constructs a rotation matrix about the Z-axis.
+
+        INPUT:
+        theta : float — angle of rotation in radians, θ ∈ R
+
+        OUTPUT:
+        R : (3x3 NDArray) — rotation matrix R ∈ SO(3)
         '''
         return np.array([
             [cos(theta), -sin(theta), 0],
@@ -117,12 +170,15 @@ class SO3:
     @staticmethod
     def rodrigues(w: List, theta: float) -> NDArray:
         '''
+        Computes the rotation matrix from an axis-angle representation (Rodrigues' formula).
+
         INPUT:
-        w -> unit axis of rotation in 3D
-        theta -> rotated how long
+        w     : List[float] — unit rotation axis, ω ∈ R^3, ‖ω‖ = 1
+        theta : float       — angle of rotation in radians, θ ∈ R
 
         OUTPUT:
-        Rotation matrix in SO3
+        R : (3x3 NDArray) — rotation matrix R ∈ SO(3)
+            R = I + sin(θ)[ω] + (1 - cos(θ))[ω]²
         '''
 
         if len(w) != 3:
@@ -138,6 +194,15 @@ class SO3:
 
     @staticmethod
     def skew_mat_to_SO3(w_theta: NDArray) -> NDArray:
+        '''
+        Matrix exponential: maps a scaled skew-symmetric matrix to SO(3).
+
+        INPUT:
+        w_theta : (3x3 NDArray) — scaled skew-symmetric matrix [ω]θ ∈ so(3)
+
+        OUTPUT:
+        R : (3x3 NDArray) — rotation matrix R = e^([ω]θ) ∈ SO(3)
+        '''
         w_vec = so3.skew_to_vec(w_theta)
         theta = float(np.linalg.norm(w_vec))
         w_hat = [float(x / theta) for x in w_vec]
@@ -148,11 +213,13 @@ class so3:
     @staticmethod
     def skew_symmetric(x1, x2, x3) -> NDArray:
         '''
-        INPUT
-        vector x = [x1 x2 x3]^T in R^3
-        
-        OUTPUT
-        skew symmetric matrix [x]
+        Constructs the skew-symmetric matrix of a 3D vector.
+
+        INPUT:
+        x1, x2, x3 : float — components of vector x ∈ R^3
+
+        OUTPUT:
+        [x] : (3x3 NDArray) — skew-symmetric matrix [x] ∈ so(3)
         '''
         return np.array([
             [0, -x3, x2],
@@ -163,12 +230,27 @@ class so3:
     @staticmethod
     def check_skew_symmetry(matrix: NDArray) -> bool:
         '''
-        [x] = -[x]^T
+        Tests whether a matrix belongs to so(3).
+
+        INPUT:
+        matrix : (3x3 NDArray) — candidate skew-symmetric matrix
+
+        OUTPUT:
+        bool — True if matrix ∈ so(3), i.e. matrix = -matrix^T
         '''
         return np.allclose(matrix.T, -matrix)
     
     @staticmethod
     def skew_to_vec(matrix: NDArray) -> List[float]:
+        '''
+        Extracts the 3D vector from a skew-symmetric matrix.
+
+        INPUT:
+        matrix : (3x3 NDArray) — skew-symmetric matrix [x] ∈ so(3)
+
+        OUTPUT:
+        x : List[float] — vector x ∈ R^3 such that [x] = matrix
+        '''
         if not so3.check_skew_symmetry(matrix):
             raise ValueError("Not a skew symmetrix matrix!")
         
@@ -181,12 +263,14 @@ class so3:
     @staticmethod
     def logarithm(R: NDArray) -> Tuple[NDArray, float]:
         '''
+        Matrix logarithm: maps a rotation matrix to so(3).
+
         INPUT:
-        R -> rotation matrix in SO3 (3x3 NDArray)
+        R : (3x3 NDArray) — rotation matrix R ∈ SO(3)
 
         OUTPUT:
-        skew_omega -> skew symmetric matrix of the rotation axis (3x3 NDArray)
-        theta      -> angle of rotation in radians (float)
+        [ω] : (3x3 NDArray) — skew-symmetric matrix [ω] ∈ so(3), rotation axis
+        θ   : float         — angle of rotation in radians, θ ∈ [0, π]
         '''
 
         if R.shape != (3,3):
@@ -218,10 +302,13 @@ class SE2:
     @staticmethod
     def SE2_test(T: NDArray) -> bool:
         '''
-        T is in SE2 if:
-        - shape is (3x3)
-        - top-left 2x2 is a valid rotation matrix in SO2 (R^T R = I, det(R) = 1)
-        - bottom row is [0, 0, 1]
+        Tests whether a matrix belongs to SE(2).
+
+        INPUT:
+        T : (3x3 NDArray) — candidate transformation matrix
+
+        OUTPUT:
+        bool — True if T ∈ SE(2), i.e. top-left 2x2 ∈ SO(2) and bottom row = [0, 0, 1]
         '''
         if T.shape != (3, 3):
             return False
@@ -234,12 +321,14 @@ class SE2:
     @staticmethod
     def transform(theta: float, p: NDArray) -> NDArray:
         '''
+        Constructs a 2D homogeneous transformation matrix.
+
         INPUT:
-        theta -> angle of rotation in radians
-        p     -> position of the new frame origin expressed in the original frame (2, NDArray)
+        theta : float        — angle of rotation in radians, θ ∈ R
+        p     : (2,) NDArray — translation vector, p ∈ R^2
 
         OUTPUT:
-        T -> homogeneous transformation matrix in SE2 (3x3 NDArray)
+        T : (3x3 NDArray) — homogeneous transformation matrix T ∈ SE(2)
         '''
         T = np.eye(3)
         T[:2, :2] = SO2.rot_matrix(theta)
@@ -249,14 +338,14 @@ class SE2:
     @staticmethod
     def trans_inverse(T: NDArray) -> NDArray:
         '''
-        Computes the inverse of a 2D transformation matrix analytically
-        using T^-1 = [R^T, -R^T p; 0, 1] instead of np.linalg.inv
+        Computes the inverse of a transformation matrix in SE(2).
 
         INPUT:
-        T -> homogeneous transformation matrix in SE2 (3x3 NDArray)
+        T : (3x3 NDArray) — transformation matrix T ∈ SE(2)
 
         OUTPUT:
-        invT -> inverse transformation matrix in SE2 (3x3 NDArray)
+        T^-1 : (3x3 NDArray) — inverse transformation T^-1 ∈ SE(2)
+               computed as [R^T, -R^T p; 0, 1]
         '''
         if not SE2.SE2_test(T):
             raise ValueError("Not a valid transformation matrix in SE2")
@@ -271,10 +360,13 @@ class SE3:
     @staticmethod
     def SE3_test(T: NDArray) -> bool:
         '''
-        T is in SE3 if:
-        - shape is (4x4)
-        - top-left 3x3 is a valid rotation matrix (R^T R = I, det(R) = 1)
-        - bottom row is [0, 0, 0, 1]
+        Tests whether a matrix belongs to SE(3).
+
+        INPUT:
+        T : (4x4 NDArray) — candidate transformation matrix
+
+        OUTPUT:
+        bool — True if T ∈ SE(3), i.e. top-left 3x3 ∈ SO(3) and bottom row = [0, 0, 0, 1]
         '''
         if T.shape != (4, 4):
             return False
@@ -287,12 +379,14 @@ class SE3:
     @staticmethod
     def transform(R: NDArray, p: NDArray) -> NDArray:
         '''
+        Constructs a 3D homogeneous transformation matrix from a rotation and translation.
+
         INPUT:
-        R -> rotation matrix in SO3 (3x3 NDArray)
-        p -> position of the new frame origin expressed in the original frame (3, NDArray)
+        R : (3x3 NDArray) — rotation matrix R ∈ SO(3)
+        p : (3,) NDArray  — translation vector p ∈ R^3
 
         OUTPUT:
-        T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
+        T : (4x4 NDArray) — homogeneous transformation matrix T ∈ SE(3)
         '''
         T = np.eye(4)
         T[:3, :3] = R
@@ -303,11 +397,13 @@ class SE3:
     @staticmethod
     def get_rotation(T: NDArray) -> NDArray:
         '''
+        Extracts the rotation matrix from a transformation matrix.
+
         INPUT:
-        T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
+        T : (4x4 NDArray) — transformation matrix T ∈ SE(3)
 
         OUTPUT:
-        R -> rotation part of the transformation (3x3 NDArray)
+        R : (3x3 NDArray) — rotation component R ∈ SO(3)
         '''
         if not SE3.SE3_test(T):
             raise ValueError("Not a valid transformation matrix in SE3")
@@ -316,11 +412,13 @@ class SE3:
     @staticmethod
     def get_translation(T: NDArray) -> NDArray:
         '''
+        Extracts the translation vector from a transformation matrix.
+
         INPUT:
-        T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
+        T : (4x4 NDArray) — transformation matrix T ∈ SE(3)
 
         OUTPUT:
-        p -> translation vector, origin of the new frame in the original frame (3, NDArray)
+        p : (3,) NDArray — translation component p ∈ R^3
         '''
         if not SE3.SE3_test(T):
             raise ValueError("Not a valid transformation matrix in SE3")
@@ -329,14 +427,14 @@ class SE3:
     @staticmethod
     def rotation(w: list, theta: float) -> NDArray:
         '''
-        Pure rotation transformation (no translation)
+        Constructs a pure rotation transformation matrix (no translation).
 
         INPUT:
-        w     -> unit axis of rotation in 3D
-        theta -> angle of rotation in radians
+        w     : List[float] — unit rotation axis, ω ∈ R^3, ‖ω‖ = 1
+        theta : float       — angle of rotation in radians, θ ∈ R
 
         OUTPUT:
-        T -> transformation matrix with rotation only, translation is zero (4x4 NDArray)
+        T : (4x4 NDArray) — transformation matrix T ∈ SE(3) with p = 0
         '''
         T = np.eye(4)
         T[:3, :3] = SO3.rodrigues(w, theta)
@@ -345,13 +443,13 @@ class SE3:
     @staticmethod
     def translation(p: NDArray) -> NDArray:
         '''
-        Pure translation transformation (no rotation)
+        Constructs a pure translation transformation matrix (no rotation).
 
         INPUT:
-        p -> displacement vector in R^3 (3, NDArray)
+        p : (3,) NDArray — displacement vector p ∈ R^3
 
         OUTPUT:
-        T -> transformation matrix with translation only, rotation is identity (4x4 NDArray)
+        T : (4x4 NDArray) — transformation matrix T ∈ SE(3) with R = I
         '''
         T = np.eye(4)
         T[:3, 3] = p
@@ -360,14 +458,14 @@ class SE3:
     @staticmethod
     def trans_inverse(T: NDArray) -> NDArray:
         '''
-        Computes the inverse of a transformation matrix analytically
-        using T^-1 = [R^T, -R^T p; 0, 1] instead of np.linalg.inv
+        Computes the inverse of a transformation matrix in SE(3).
 
         INPUT:
-        T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
+        T : (4x4 NDArray) — transformation matrix T ∈ SE(3)
 
         OUTPUT:
-        invT -> inverse transformation matrix in SE3 (4x4 NDArray)
+        T^-1 : (4x4 NDArray) — inverse transformation T^-1 ∈ SE(3)
+               computed as [R^T, -R^T p; 0, 1]
         '''
         if not SE3.SE3_test(T):
             raise ValueError("Not a valid transformation matrix in SE3")
@@ -379,11 +477,46 @@ class SE3:
         invT[:3, 3] = -(R.T)@p
 
         return invT
- 
+
+    @staticmethod
+    def adjoint(T: NDArray) -> NDArray:
+        '''
+        Computes the adjoint representation of a transformation matrix.
+
+        INPUT:
+        T : (4x4 NDArray) — transformation matrix T ∈ SE(3)
+
+        OUTPUT:
+        [Ad_T] : (6x6 NDArray) — adjoint matrix, [Ad_T] ∈ R^(6x6)
+                 used to change the reference frame of a twist: V_a = [Ad_T] V_b
+        '''
+        if not SE3.SE3_test(T):
+            raise ValueError("Input is not a valid SE3 transformation matrix")
+
+        R = T[:3,:3]
+        p = T[:3, 3]
+
+        adj = np.zeros((6,6))
+
+        adj[:3,:3] = R
+        adj[3:,3:] = R
+        adj[3:, :3] = so3.skew_symmetric(*p) @ R
+
+        return adj
+
 class se3:
 
     @staticmethod
     def se3_test(mat: NDArray) -> bool:
+        '''
+        Tests whether a matrix belongs to se(3).
+
+        INPUT:
+        mat : (4x4 NDArray) — candidate Lie algebra matrix
+
+        OUTPUT:
+        bool — True if mat ∈ se(3), i.e. top-left 3x3 ∈ so(3) and bottom row = [0, 0, 0, 0]
+        '''
         if mat.shape != (4, 4):
             return False
         if not np.allclose(mat[3, :], 0):
@@ -395,11 +528,13 @@ class se3:
     @staticmethod
     def vec_to_se3(V: NDArray) -> NDArray:
         '''
+        Constructs an se(3) matrix from a twist vector.
+
         INPUT:
-        Vector from R^6 where V = (w, v)
+        V : (6,) NDArray — twist vector V = (ω, v) ∈ R^6
 
         OUTPUT:
-        Twist in se3
+        [V] : (4x4 NDArray) — twist matrix [V] ∈ se(3)
         '''
         if V.shape != (6,):
             raise ValueError("Input must be a vector in R^6")
@@ -417,11 +552,13 @@ class se3:
     @staticmethod
     def se3_to_vec(mat: NDArray) -> NDArray:
         '''
+        Extracts the twist vector from an se(3) matrix.
+
         INPUT:
-        4x4 se3 matrix [V]
+        [V] : (4x4 NDArray) — twist matrix [V] ∈ se(3)
 
         OUTPUT:
-        V = (w,v) in R^6
+        V : (6,) NDArray — twist vector V = (ω, v) ∈ R^6
         '''
         if not se3.se3_test(mat):
             raise ValueError("Input is not a valid se3 matrix")
@@ -432,36 +569,17 @@ class se3:
         return np.concatenate([w, v])
     
     @staticmethod
-    def adjoint(T: NDArray) -> NDArray:
-        '''
-        INPUT:
-        4x4 Tranformation Matrix
-
-        OUTPUT:
-        adjoint matrix [Ad_T]
-        '''
-        if not SE3.SE3_test(T):
-            raise ValueError("Input is not a valid SE3 transformation matrix")
-
-        R = T[:3,:3]
-        p = T[:3, 3]
-
-        adj = np.zeros((6,6))
-
-        adj[:3,:3] = R
-        adj[3:,3:] = R
-        adj[3:, :3] = so3.skew_symmetric(*p) @ R
-
-        return adj
-
-    @staticmethod
     def screw_exp6(w: NDArray, v: NDArray, theta: float) -> NDArray:
         '''
+        Matrix exponential: maps a screw axis and angle to SE(3).
+
         INPUT:
-        let S = (w,v) screw axis
+        w     : (3x3 NDArray) — skew-symmetric matrix [ω] ∈ so(3)
+        v     : (3,) NDArray  — linear velocity component v ∈ R^3
+        theta : float         — angle/distance of motion along the screw, θ ∈ R
 
         OUTPUT:
-        exponential coordinate
+        T : (4x4 NDArray) — transformation matrix T = e^([S]θ) ∈ SE(3)
         '''
         if not so3.check_skew_symmetry(w):
             raise ValueError("Matrix provided is not a skew symmetric matrix")
@@ -485,6 +603,16 @@ class se3:
 
     @staticmethod
     def mat_exp6(se3mat: NDArray, theta: float) -> NDArray:
+        '''
+        Matrix exponential from an se(3) matrix and angle to SE(3).
+
+        INPUT:
+        se3mat : (4x4 NDArray) — twist matrix [S] ∈ se(3)
+        theta  : float         — angle/distance of motion, θ ∈ R
+
+        OUTPUT:
+        T : (4x4 NDArray) — transformation matrix T = e^([S]θ) ∈ SE(3)
+        '''
         if not se3.se3_test(se3mat):
             raise ValueError("Not a se3 matrix")
         
@@ -493,11 +621,17 @@ class se3:
     @staticmethod
     def logarithm6(T: NDArray) -> Tuple[NDArray, NDArray, float]:
         '''
-        INPUT:
-        T in SE3
+        Matrix logarithm: maps a transformation matrix to se(3).
 
-        OUPUT:
-        [S]theta - ([w], v, theta) in se3
+        INPUT:
+        T : (4x4 NDArray) — transformation matrix T ∈ SE(3)
+
+        OUTPUT:
+        [ω] : (3x3 NDArray) — skew-symmetric matrix [ω] ∈ so(3), rotation axis
+        v   : (3,) NDArray  — linear component of the screw axis, v ∈ R^3
+        θ   : float         — angle/distance of motion, θ ∈ [0, π]
+
+        such that e^([S]θ) = T, where S = (ω, v)
         '''
 
         if not SE3.SE3_test(T):
