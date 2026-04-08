@@ -401,6 +401,9 @@ class se3:
         OUTPUT:
         Twist in se3
         '''
+        if V.shape != (6,):
+            raise ValueError("Input must be a vector in R^6")
+
         w, v = V[:3], V[3:]
 
         w_so3 = so3.skew_symmetric(*w)
@@ -420,11 +423,13 @@ class se3:
         OUTPUT:
         V = (w,v) in R^6
         '''
+        if not se3.check_se3(mat):
+            raise ValueError("Input is not a valid se3 matrix")
 
         w = so3.skew2vec(mat[:3,:3])
         v = mat[:3, 3]
 
-        return np.concatenate(w,v)
+        return np.concatenate([w, v])
     
     @staticmethod
     def adjoint(T: NDArray) -> NDArray:
@@ -435,6 +440,8 @@ class se3:
         OUTPUT:
         adjoint matrix [Ad_T]
         '''
+        if not SE3.SE3_test(T):
+            raise ValueError("Input is not a valid SE3 transformation matrix")
 
         R = T[:3,:3]
         p = T[:3, 3]
@@ -501,6 +508,8 @@ class se3:
 
         if np.allclose(R, np.eye(3)):
             w = np.zeros((3,3))
+            if np.allclose(p, np.zeros(3)):
+                return (w, np.zeros(3), 0.0)
             theta = float(np.linalg.norm(p))
             v = p / theta
             return (w, v, theta)
@@ -522,6 +531,13 @@ class se3:
         OUTPUT:
         S = (w, v) in R^6 — normalized screw axis
         '''
+
+        if q.shape != (3,):
+            raise ValueError("q must be a point in R^3")
+        if s_hat.shape != (3,):
+            raise ValueError("s_hat must be a vector in R^3")
+        if abs(np.linalg.norm(s_hat) - 1) > 1e-9:
+            raise ValueError("s_hat must be a unit vector")
 
         if np.isinf(h):
             w = np.zeros(3)
