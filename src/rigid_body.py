@@ -504,6 +504,21 @@ class SE3:
 
         return adj
 
+    @staticmethod
+    def wrench_transform(F: NDArray, T: NDArray) -> NDArray:
+        '''
+        Changes the reference frame of a wrench using the adjoint transpose.
+
+        INPUT:
+        F : (6,) NDArray  — wrench F_a ∈ R^6 expressed in frame {a}
+        T : (4x4 NDArray) — transformation matrix T_{ab} ∈ SE(3) from {a} to {b}
+
+        OUTPUT:
+        F_b : (6,) NDArray — wrench expressed in frame {b} ∈ R^6
+              F_b = [Ad_{T_{ab}}]^T F_a
+        '''
+        return SE3.adjoint(T).T @ F
+
 class se3:
 
     @staticmethod
