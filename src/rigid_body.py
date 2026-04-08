@@ -9,7 +9,7 @@ class SO2:
     identity = np.identity(2, dtype=np.float32)
 
     @staticmethod
-    def so2_test(R: NDArray) -> bool:
+    def SO2_test(R: NDArray) -> bool:
         '''
         (R^T)R = I
         det(R) = 1
@@ -28,7 +28,7 @@ class SO2:
         R^-1 = R^T
         else -> return identity
         '''
-        if SO2.so2_test(R):
+        if SO2.SO2_test(R):
             return R.T
 
         return SO2.identity
@@ -137,8 +137,8 @@ class SO3:
         return rot
 
     @staticmethod
-    def skewmat2SO3(w_theta: NDArray) -> NDArray:
-        w_vec = so3.skew2vec(w_theta)
+    def skew_mat_to_SO3(w_theta: NDArray) -> NDArray:
+        w_vec = so3.skew_to_vec(w_theta)
         theta = float(np.linalg.norm(w_vec))
         w_hat = [float(x / theta) for x in w_vec]
 
@@ -168,7 +168,7 @@ class so3:
         return np.allclose(matrix.T, -matrix)
     
     @staticmethod
-    def skew2vec(matrix: NDArray) -> List[float]:
+    def skew_to_vec(matrix: NDArray) -> List[float]:
         if not so3.check_skew_symmetry(matrix):
             raise ValueError("Not a skew symmetrix matrix!")
         
@@ -225,7 +225,7 @@ class SE2:
         '''
         if T.shape != (3, 3):
             return False
-        if not SO2.so2_test(T[:2, :2]):
+        if not SO2.SO2_test(T[:2, :2]):
             return False
         if not np.allclose(T[2], [0, 0, 1]):
             return False
@@ -301,7 +301,7 @@ class SE3:
         return T
     
     @staticmethod
-    def getRotation(T: NDArray) -> NDArray:
+    def get_rotation(T: NDArray) -> NDArray:
         '''
         INPUT:
         T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
@@ -314,7 +314,7 @@ class SE3:
         return T[:3, :3]
     
     @staticmethod
-    def getTranslation(T: NDArray) -> NDArray:
+    def get_translation(T: NDArray) -> NDArray:
         '''
         INPUT:
         T -> homogeneous transformation matrix in SE3 (4x4 NDArray)
@@ -383,7 +383,7 @@ class SE3:
 class se3:
 
     @staticmethod
-    def check_se3(mat: NDArray) -> bool:
+    def se3_test(mat: NDArray) -> bool:
         if mat.shape != (4, 4):
             return False
         if not np.allclose(mat[3, :], 0):
@@ -423,10 +423,10 @@ class se3:
         OUTPUT:
         V = (w,v) in R^6
         '''
-        if not se3.check_se3(mat):
+        if not se3.se3_test(mat):
             raise ValueError("Input is not a valid se3 matrix")
 
-        w = so3.skew2vec(mat[:3,:3])
+        w = so3.skew_to_vec(mat[:3,:3])
         v = mat[:3, 3]
 
         return np.concatenate([w, v])
@@ -467,14 +467,14 @@ class se3:
             raise ValueError("Matrix provided is not a skew symmetric matrix")
 
         exp = np.eye(4)
-        if np.abs(np.linalg.norm(so3.skew2vec(w)) - 1) < 1e-9:
+        if np.abs(np.linalg.norm(so3.skew_to_vec(w)) - 1) < 1e-9:
             
-            exp[:3, :3] = SO3.rodrigues(list(so3.skew2vec(w)), theta)
+            exp[:3, :3] = SO3.rodrigues(list(so3.skew_to_vec(w)), theta)
             exp[:3, 3] = (np.eye(3)*theta + (1-cos(theta))*w + (theta - sin(theta)) * (w @ w)  ) @ v
 
             return exp
         
-        elif np.linalg.norm(so3.skew2vec(w)) < 1e-9 and np.abs(np.linalg.norm(v) - 1) < 1e-9:
+        elif np.linalg.norm(so3.skew_to_vec(w)) < 1e-9 and np.abs(np.linalg.norm(v) - 1) < 1e-9:
 
             exp[:3, 3] = v * theta
 
@@ -485,7 +485,7 @@ class se3:
 
     @staticmethod
     def mat_exp6(se3mat: NDArray, theta: float) -> NDArray:
-        if not se3.check_se3(se3mat):
+        if not se3.se3_test(se3mat):
             raise ValueError("Not a se3 matrix")
         
         return se3.screw_exp6(se3mat[:3, :3], se3mat[:3, 3], theta)
