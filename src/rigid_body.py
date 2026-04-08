@@ -511,8 +511,23 @@ class se3:
 
             return (w, v, theta)
             
+    @staticmethod
+    def screw_to_axis(q: NDArray, s_hat: NDArray, h: float) -> NDArray:
+        '''
+        INPUT:
+        q     : a point on the screw axis (R^3)
+        s_hat : unit vector in the direction of the screw axis (R^3)
+        h     : pitch of the screw (h=0 for pure rotation, h=inf for pure translation)
 
+        OUTPUT:
+        S = (w, v) in R^6 — normalized screw axis
+        '''
 
-'''
-- [ ] **`screw_to_axis(q, s_hat, h)`** —Definition 3.24 - §3.3.2.2, Def 3.24 — builds S from {q, ŝ, h}. (Ex 3.26, 3.27)
-'''
+        if np.isinf(h):
+            w = np.zeros(3)
+            v = s_hat
+        else:
+            w = s_hat
+            v = np.cross(-s_hat, q) + h * s_hat
+
+        return np.concatenate([w, v])
