@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print(so3.skew_symmetric(*[1,2,0.5]))
 
     # q11
-    # print(SO3.skewmat2SO3(np.array([
+    # print(SO3.skew_mat_to_SO3(np.array([
     #     [0, 0.5, -1],
     #     [-0.5, 0, 2],
     #     [1, -2, 0]
