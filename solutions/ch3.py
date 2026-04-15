@@ -1,6 +1,6 @@
 from src.rigid_body import so3, SO3, SE3, se3
 import numpy as np
-from modern_robotics import VecToso3, MatrixExp3, MatrixLog3
+# from modern_robotics import VecToso3, MatrixExp3, MatrixLog3
 
 if __name__ == "__main__":
     # assignments ------------------------
@@ -79,3 +79,45 @@ if __name__ == "__main__":
     print(f"q={np.round(q,4)}, s_hat={np.round(s_hat,4)}, h={round(h,4)}")
 
     print("3.28 >")
+
+
+    print("3.29a >")
+
+    T_01 = SE3.transform(
+        np.array([
+            [1,0,0],
+            [0,1,0],
+            [0,0,1]
+        ]),
+        np.array([0,1,0])
+    )
+
+    T_02_a = SE3.transform(
+        np.array([
+            [1,0,0],
+            [0,1,0],
+            [0,0,1]
+        ]),
+        np.array([1,0,1])
+    )
+
+    T_a = T_02_a @ SE3.trans_inverse(T_01)
+    skew_a, V_a, theta_a = se3.logarithm6(T_a)
+    s_hat_a = so3.skew_to_vec(skew_a)
+    S_a = np.concatenate([s_hat_a, V_a]) * theta_a
+    print(S_a)
+
+    T_02_b = SE3.transform(
+        np.array([
+            [-1,0,0],
+            [0,-1,0],
+            [0,0,1]
+        ]),
+        np.array([1,0,1])
+    )
+
+    T_b = T_02_b @ SE3.trans_inverse(T_01)
+    skew_b, V_b, theta_b = se3.logarithm6(T_b)
+    s_hat_b = so3.skew_to_vec(skew_b)
+    S_b = np.concatenate([s_hat_b, V_b]) * theta_b
+    print(S_b)
