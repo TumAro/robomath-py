@@ -519,6 +519,33 @@ class SE3:
         '''
         return SE3.adjoint(T).T @ F
 
+    @staticmethod
+    def compose(A: NDArray, B: NDArray) -> NDArray:
+        '''
+        INPUT
+        A, B in SE3
+
+        OUTPUT
+        R = AB in SE3
+        '''
+        if not SE3.SE3_test(A) or not SE3.SE3_test(B):
+            raise ValueError("Not a valid Transformation Matrix")
+        
+        R_A = SE3.get_rotation(A)
+        p_A = SE3.get_translation(A)
+
+        R_B = SE3.get_rotation(B)
+        p_B = SE3.get_translation(B)
+
+        R = np.eye(4)
+
+        R[:3,:3] = R_A @ R_B
+        R[:3, 3] = R_A @ p_A + p_B
+
+        return R
+        
+
+
 class se3:
 
     @staticmethod
