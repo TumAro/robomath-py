@@ -540,7 +540,7 @@ class SE3:
         R = np.eye(4)
 
         R[:3,:3] = R_A @ R_B
-        R[:3, 3] = R_A @ p_A + p_B
+        R[:3, 3] = R_A @ p_B + p_A
 
         return R
         
