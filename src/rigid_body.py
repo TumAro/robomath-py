@@ -670,6 +670,44 @@ class se3:
             return (w, v, theta)
             
     @staticmethod
+    def axis_to_screw(S: NDArray) -> Tuple[NDArray, NDArray, float]:
+        '''
+        Inverse of screw_to_axis: recovers {q, s_hat, h} from a normalized screw axis.
+
+        INPUT:
+        S : (6,) NDArray — normalized screw axis S = (ω, v) ∈ R^6
+                           either ‖ω‖ = 1 (rotation) or ω = 0 and ‖v‖ = 1 (translation)
+
+        OUTPUT:
+        q     : (3,) NDArray — a point on the screw axis (closest point to origin)
+        s_hat : (3,) NDArray — unit direction of the screw axis
+        h     : float        — pitch of the screw (np.inf for pure translation)
+
+        From the book (Def 3.24):
+          Case ‖ω‖ = 1:  s_hat = ω,  h = ωᵀv,  q = ω × (v − h·ω)
+          Case ω = 0:    s_hat = v,  h = ∞,     q = undefined (set to zeros)
+        '''
+        if S.shape != (6,):
+            raise ValueError("S must be a vector in R^6")
+
+        w, v = S[:3], S[3:]
+
+        if abs(np.linalg.norm(w) - 1) < 1e-9:
+            s_hat = w
+            h = float(np.dot(w, v))
+            q = np.cross(w, v - h * w)
+            return q, s_hat, h
+
+        elif np.linalg.norm(w) < 1e-9 and abs(np.linalg.norm(v) - 1) < 1e-9:
+            s_hat = v
+            h = np.inf
+            q = np.zeros(3)
+            return q, s_hat, h
+
+        else:
+            raise ValueError("S is not a normalized screw axis: need ‖ω‖=1 or ω=0 and ‖v‖=1")
+
+    @staticmethod
     def screw_to_axis(q: NDArray, s_hat: NDArray, h: float) -> NDArray:
         '''
         INPUT:
