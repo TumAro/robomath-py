@@ -1,5 +1,5 @@
 [project]
-name = "mr"
+name = "robomath"
 version = "0.1.0"
 description = "My own implementation of robotics maths from 1st principles"
 readme = "README.md"
