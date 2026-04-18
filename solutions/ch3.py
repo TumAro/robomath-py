@@ -1,4 +1,4 @@
-from src.rigid_body import so3, SO3, SE3, se3
+from src.lie import so3, SO3, SE3, se3
 import numpy as np
 # from modern_robotics import VecToso3, MatrixExp3, MatrixLog3
 
