@@ -1,0 +1,44 @@
+import math
+from typing import List
+from numpy.typing import NDArray
+import numpy as np
+
+from lie import SE3, se3
+
+class ForwardKin:
+
+    @staticmethod
+    def fk_space(M: NDArray, S_list: NDArray, theta: NDArray):
+        '''
+        INPUT:
+        M: home state when all angles are 0 in SE3
+        S_list: all the screw axis in se3 of individual joints of the system
+        theta: angle vector of all the joints
+
+        above indexed at i: 0 to n-1
+
+        OUTPUT:
+        space form in SE3
+        '''
+
+        if not SE3.SE3_test(M):
+            raise ValueError("The provided HOME STATE is not defined in SE3")
+        if len(S_list) != len(theta):
+            raise ValueError("Size mismatch for given Screw Axis list and theta vector")
+        
+
+        T = M
+        if np.allclose(theta, 0, atol=1e-9):
+            return T
+
+        for i in range(len(theta)-1,-1,-1):
+
+            if abs(theta[i]) <= 1e-9:
+                continue
+            
+            if not se3.se3_test(S_list[i]):
+                raise ValueError(f"The {{i}}-th Screw Axis is not in se3")
+            
+            T = se3.mat_exp6(S_list[i], theta[i]) @ T
+
+        return T
