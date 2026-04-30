@@ -74,7 +74,7 @@ class ForwardKin:
                 raise ValueError(f"The {{i}}-th Screw Axis is not in se3")
             T = T @ se3.mat_exp6(B_list[i], theta[i])
             
-        return 
+        return T
     
     @staticmethod
     def fk_consistency(M: NDArray, S_list: NDArray, theta: NDArray) -> bool:
@@ -96,8 +96,8 @@ class ForwardKin:
             for S in S_list
         ])
 
-        T_space = SE3.fk_space(M, S_list, theta)
-        T_body  = SE3.fk_body(M, B_list, theta)
+        T_space = ForwardKin.fk_space(M, S_list, theta)
+        T_body  = ForwardKin.fk_body(M, B_list, theta)
 
         if np.allclose(T_space, T_body, atol=1e-6):
             return True
