@@ -6,11 +6,6 @@ from typing import List, Tuple
 _identity = np.identity(3, dtype=np.float32)
 
 # * IMPLEMENTATION OF ==> SO GROUP
-def _check_square(R: NDArray) -> bool:
-    r, c = R.shape
-    if r != c:
-        raise ValueError("NOT a square Matrix")
-    return r==c
 
 def SO3_test(R: NDArray) -> bool:
     '''
@@ -28,18 +23,6 @@ def SO3_test(R: NDArray) -> bool:
         return False
     
     return True
-
-def transpose(R: List[List[float]]):
-    '''
-    Computes the transpose of a matrix represented as nested Python lists.
-
-    INPUT:
-    R : List[List[float]] — matrix as nested lists
-
-    OUTPUT:
-    R^T : List[List[float]] — transpose of R
-    '''
-    return [list(row) for row in zip(*R)]
 
 def rot_inv(R: NDArray) -> NDArray[np.float32]:
     '''
