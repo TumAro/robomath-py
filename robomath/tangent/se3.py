@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from robomath._types import Matrix_4X4, Vector6
+from robomath._types import Matrix_4x4, Vector6
 
 from robomath._core.se3 import (
     se3_test,
@@ -8,7 +8,7 @@ from robomath._core.se3 import (
 
 @dataclass (frozen=True)
 class se3:
-    matrix: Matrix_4X4
+    matrix: Matrix_4x4
 
     def __post_init__(self) -> None:
         if not se3_test(self.matrix):
