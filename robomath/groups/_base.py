@@ -11,9 +11,5 @@ class LieGroup(ABC):
         pass
 
     @abstractmethod
-    def adjoint(self):
-        pass
-
-    @abstractmethod
     def __matmul__(self):
         pass
