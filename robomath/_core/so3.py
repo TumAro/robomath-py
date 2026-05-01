@@ -3,6 +3,8 @@ from math import sin, cos
 from numpy.typing import NDArray
 from typing import List, Tuple
 
+from robomath._types import Vector3
+
 _identity = np.identity(3, dtype=np.float32)
 
 # * IMPLEMENTATION OF ==> SO GROUP
@@ -158,7 +160,7 @@ def check_skew_symmetry(matrix: NDArray) -> bool:
     '''
     return np.allclose(matrix.T, -matrix)
 
-def skew_to_vec(matrix: NDArray) -> List[float]:
+def skew_to_vec(matrix: NDArray) -> Vector3:
     '''
     Extracts the 3D vector from a skew-symmetric matrix.
 
@@ -175,7 +177,7 @@ def skew_to_vec(matrix: NDArray) -> List[float]:
     x2 = matrix[0][2]
     x3 = matrix[1][0]
 
-    return [x1, x2, x3]
+    return np.array([x1, x2, x3])
 
 def logarithm(R: NDArray) -> Tuple[NDArray, float]:
         '''
