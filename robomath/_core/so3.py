@@ -1,7 +1,7 @@
 import numpy as np
 from math import sin, cos
 from numpy.typing import NDArray
-from typing import List, Tuple
+from typing import Tuple
 
 from robomath._types import Vector3
 
@@ -90,7 +90,7 @@ def rot_z(theta: float) -> NDArray[np.float32]:
         [0,0,1]
     ])
 
-def rodrigues(w: List, theta: float) -> NDArray:
+def rodrigues(w: Vector3, theta: float) -> NDArray:
     '''
     Computes the rotation matrix from an axis-angle representation (Rodrigues' formula).
 
@@ -126,7 +126,7 @@ def skew_mat_to_SO3(w_theta: NDArray) -> NDArray:
         '''
         w_vec = skew_to_vec(w_theta)
         theta = float(np.linalg.norm(w_vec))
-        w_hat = [float(x / theta) for x in w_vec]
+        w_hat = np.array([float(x / theta) for x in w_vec])
 
         return rodrigues(w_hat, theta)
 
