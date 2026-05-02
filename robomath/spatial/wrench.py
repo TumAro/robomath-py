@@ -27,4 +27,4 @@ class Wrench:
     
     @property
     def force(self) -> Vector3:
-        return self._vec[:3]
+        return self._vec[3:]
