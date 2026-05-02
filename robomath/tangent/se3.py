@@ -3,7 +3,8 @@ from robomath._types import Matrix_4x4, Vector6
 
 from robomath._core.se3 import (
     se3_test,
-    se3_to_vec
+    se3_to_vec,
+    mat_exp6
 )
 
 @dataclass (frozen=True)
@@ -20,6 +21,5 @@ class se3:
     def to_vec(self) -> Vector6:
         return se3_to_vec(self.matrix)
     
-    def exp(self, theta: float):
-        # TODO: implement after SE3 class exists
-        raise NotImplementedError
+    def exp(self, theta: float) -> Matrix_4x4:
+        return mat_exp6(self.matrix, theta)

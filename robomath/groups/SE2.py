@@ -8,3 +8,11 @@ from robomath._types import Matrix_3x3
 class SO2(LieGroup):
     matrix: Matrix_3x3
     # TODO: se2 tangent space is not built yet
+
+    def __repr__(self) -> str:
+        return f"SO2(\n{self.matrix}\n)"
+    
+    def __array__(self, dtype = None):
+        if dtype:
+            return self.matrix.astype(dtype)
+        return self.matrix
