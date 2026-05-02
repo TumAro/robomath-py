@@ -41,6 +41,10 @@ class SO3(LieGroup):
         matrix, theta = logarithm(self.matrix)
         return so3(matrix), theta
     
+    @property
+    def T(self) -> SO3:
+        return self.inv()
+
     @staticmethod
     def rodrigues(axis_vec: Vector3, theta: float) -> SO3:
         return SO3(rodrigues(axis_vec, theta))
