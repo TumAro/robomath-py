@@ -1,6 +1,6 @@
 [project]
 name = "robomath"
-version = "1.5.2026"
+version = "2.5.2026"
 description = "Implementation of robotics maths from 1st principles"
 authors = [{name = "Tumin", email = "contact.tumins@gmail.com"}]
 readme = "README.md"
