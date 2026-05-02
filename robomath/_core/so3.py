@@ -3,8 +3,6 @@ from math import sin, cos
 from numpy.typing import NDArray
 from typing import Tuple
 
-from robomath._types import Vector3
-
 _identity = np.identity(3, dtype=np.float32)
 
 # * IMPLEMENTATION OF ==> SO GROUP
@@ -90,7 +88,7 @@ def rot_z(theta: float) -> NDArray[np.float32]:
         [0,0,1]
     ])
 
-def rodrigues(w: Vector3, theta: float) -> NDArray:
+def rodrigues(w: NDArray, theta: float) -> NDArray:
     '''
     Computes the rotation matrix from an axis-angle representation (Rodrigues' formula).
 
@@ -160,7 +158,7 @@ def check_skew_symmetry(matrix: NDArray) -> bool:
     '''
     return np.allclose(matrix.T, -matrix)
 
-def skew_to_vec(matrix: NDArray) -> Vector3:
+def skew_to_vec(matrix: NDArray) -> NDArray:
     '''
     Extracts the 3D vector from a skew-symmetric matrix.
 

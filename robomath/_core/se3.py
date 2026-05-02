@@ -77,7 +77,7 @@ def get_translation(T: NDArray) -> NDArray:
         raise ValueError("Not a valid transformation matrix in SE3")
     return T[:3, 3]
 
-def rotation(w: list, theta: float) -> NDArray:
+def rotation(w: NDArray, theta: float) -> NDArray:
     '''
     Constructs a pure rotation transformation matrix (no translation).
 
@@ -271,7 +271,7 @@ def screw_exp6(w: NDArray, v: NDArray, theta: float) -> NDArray:
     exp = np.eye(4)
     if np.abs(np.linalg.norm(skew_to_vec(w)) - 1) < 1e-9:
         
-        exp[:3, :3] = rodrigues(list(skew_to_vec(w)), theta)
+        exp[:3, :3] = rodrigues(skew_to_vec(w), theta)
         exp[:3, 3] = (np.eye(3)*theta + (1-cos(theta))*w + (theta - sin(theta)) * (w @ w)  ) @ v
 
         return exp
