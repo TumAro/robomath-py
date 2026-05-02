@@ -10,7 +10,7 @@ class SE2(LieGroup):
     # TODO: se2 tangent space is not built yet
 
     def __repr__(self) -> str:
-        return f"SO2(\n{self.matrix}\n)"
+        return f"SO2({self.matrix})"
     
     def __array__(self, dtype = None):
         if dtype:

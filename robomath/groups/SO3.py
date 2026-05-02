@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Tuple, Literal
+from numpy import asarray
 
 from robomath.groups._base import LieGroup
 from robomath._types import Matrix_3x3, Vector3
@@ -21,9 +22,10 @@ class SO3(LieGroup):
     def __post_init__(self) -> None:
         if not SO3_test(self.matrix):
             raise ValueError("Not a  matrix!")
+        object.__setattr__(self, 'matrix', asarray(self.matrix))
         
     def __repr__(self) -> str:
-        return f"SO3(\n{self.matrix}\n)"
+        return f"SO3({self.matrix})"
     
     def __matmul__(self, other: SO3) -> SO3:
         return SO3(self.matrix @ other.matrix)

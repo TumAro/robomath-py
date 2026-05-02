@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from numpy import asarray
 
 from robomath.groups._base import LieGroup
 from robomath._types import Matrix_2x2
@@ -14,9 +15,10 @@ class SO2(LieGroup):
     def __post_init__(self) -> None:
         if not SO2_test(self.matrix):
             raise ValueError("Not a SO2 matrix!")
+        object.__setattr__(self, 'matrix', asarray(self.matrix))
         
     def __repr__(self) -> str:
-        return f"SO2(\n{self.matrix}\n)"
+        return f"SO2({self.matrix})"
     
     def __matmul__(self, mat2: Matrix_2x2) -> Matrix_2x2:
         return self.matrix @ mat2
